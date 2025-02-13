@@ -1,0 +1,392 @@
+                                                                      
+ --:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: 
+ :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: 
+ :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: 
+ :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: 
+ :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: 
+ :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: 
+ :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: 
+ ::::::::::::::::::::::::&.::.&....:.&:::.&;::::::::::::::::::::::::: 
+ ::::::::::::::::::::::::::&.&&&&&&&&.&&.&::::::::::::::::::::::::::: 
+ :::::::::::::::::::::::::::..X&&&&&&&...:::::::::::::::::::::::::::: 
+ :::::::::::::::::::&&&&;:&.:::..:....:::&::&&&&::::::::::::::::::::: 
+ :::::::::::::::::::::::::&&.&&&&&&&&.&.&&::::::::::::::::::::::::::: 
+ :::::::::::::::::::::::&&&&.&&&&&&&&&&.&x&&::::::::::::::::::::::::: 
+ :::::::::::::::::::::&&:&:&&.&&&&&&&&.&&X&:&&::::::::::::::::::::::: 
+ :::::::::::::::::::&&::&:&.&&.:&&&&..&:&&:&::&&::::::::::::::::::::: 
+ ::::::::::::::::::&::&:$:&:&&.&&&&&&.&.&&:&.&::&&::::::::::::::::::: 
+ ::::::::::::::::&:&x&.&::&:&:&......&:&&X&:&:&:$;&:::::::::::::::::: 
+ ::::::::::::::&&.&&&:X;:X&&.$&.&&&&:&.&&:&::&:&&&x$&:::::::::::::::: 
+ :::::::::::::&+::&&::&.&&:&:&:&.&&&++&:&:&::;&:&&&::&::::::::::::::: 
+ ::::::::::::&&.&.&.&&:;:&:&:&:&.&&:&:&:&:&:&:&&:&:&:X&:::::::::::::: 
+ ::::::::::::&&$..&&::$.:&.&.&:&x..:&:&:&:&.:&::&&X:&&&.::::::::::::: 
+ :::::::::::&&.&&::::::::&::&.&:&:.&::x&&:x&:::::::&&;&&::::::::::::: 
+ ::::::::::.;::::::::::::&&:&:&:&::&:&:&:X&&:::::::::::.$:::::::::::: 
+ :::::::::::::::::::::::&&&:&::.&::&&&:&:&:&::::::::::::::::::::::::: 
+ :::::::::::::::::::::::+&;::&:&::::&:&::&:&::::::::::::::::::::::::: 
+ ::::::::::::::::::::::::&:&:&&&:::::&&:&:X&::::::::::::::::::::::::: 
+ ::::::::::::::::::::::::&::+&&:::.::&&:+:&:::::::::::::::::::::::::: 
+ ::::::::::::::::::::::::X&:&&.:::::::&&:x&:::::::::::::::::::::::::: 
+ :::::::::::::::::::::::::&&::::::::::::&&::::::::::::::::::::::::::: 
+ :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: 
+ :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: 
+ :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: 
+ :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: 
+ :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: 
+ :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: 
+ ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+-- تحميل مكتبة Rayfield وتسميتها CICADA_HUB
+local CICADA_HUB = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+
+-- إنشاء نافذة رئيسية باسم "CICADA HUB"
+local Window = CICADA_HUB:CreateWindow({
+   Name = "CICADA HUB",  -- تغيير اسم النافذة إلى "CICADA HUB"
+   Icon = 0,  -- يمكنك استبداله برقم أيقونة مناسب
+   LoadingTitle = "CICADA HUB Interface",  -- تغيير العنوان عند تحميل الواجهة
+   LoadingSubtitle = "by CICADA",  -- تغيير النص الفرعي ليكون "by CICADA"
+   Theme = "Default",  -- الثيم يمكن تغييره حسب الخيارات
+   DisableRayfieldPrompts = false,
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = nil,
+      FileName = "CicadaHub"
+   },
+   Discord = {
+      Enabled = false,
+      Invite = "noinvitelink",
+      RememberJoins = true
+   },
+   KeySystem = false,
+   KeySettings = {
+      Title = "CICADA HUB Key System",
+      Subtitle = "Enter Key",
+      Note = "Please enter the key to proceed",
+      FileName = "CicadaHub_Key",
+      SaveKey = true,
+      GrabKeyFromSite = false,
+      Key = {"YourKey"}
+   }
+})
+
+-- الحصول على اللاعب وخدماته
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+-- دالة للحصول على الـ Humanoid من شخصية اللاعب
+local function getHumanoid()
+    local character = player.Character or player.CharacterAdded:Wait()
+    local hum = character:FindFirstChildOfClass("Humanoid")
+    if not hum then
+        character:WaitForChild("Humanoid")
+        hum = character:FindFirstChildOfClass("Humanoid")
+    end
+    return hum
+end
+
+-- التقاط القيم الافتراضية عند تشغيل السكربت
+local localHumanoid = getHumanoid()
+local defaultWalkSpeed = (localHumanoid and localHumanoid.WalkSpeed) or 16
+local defaultJumpPower = (localHumanoid and localHumanoid.JumpPower) or 50
+local defaultGravity = workspace.Gravity
+
+-- متغيرات مراقبة حالة السكربت
+local flingScriptActive = false
+local flingScript
+
+-- متغيرات تفعيل أو تعطيل تأثيرات السلايدر
+local WalkSpeedEnabled = true
+local JumpPowerEnabled = true
+local gravityEnabled = true
+local currentGravityValue = defaultGravity
+
+----------------------------------------------------------
+-- تبويب PLAYER
+----------------------------------------------------------
+local PlayerTab = Window:CreateTab("PLAYER", 4483362458)
+
+---------------------------
+-- التحكم بسرعة المشي:
+---------------------------
+-- زر "تفعيل/تعطيل سرعة المشي"
+PlayerTab:CreateButton({
+   Name = "تفعيل/تعطيل سرعة المشي",
+   Callback = function()
+      WalkSpeedEnabled = not WalkSpeedEnabled
+      local hum = getHumanoid()
+      if WalkSpeedEnabled then
+         CICADA_HUB:Notify({
+            Title = "السرعة",
+            Content = "تم تفعيل السرعة ✅",
+            Duration = 3,
+            Image = 4483362458,
+         })
+      else
+         if hum then
+            hum.WalkSpeed = defaultWalkSpeed  -- إعادة السرعة للقيمة الأصلية
+         end
+         CICADA_HUB:Notify({
+            Title = "السرعة",
+            Content = "تم إيقاف السرعة ❌",
+            Duration = 3,
+            Image = 4483362458,
+         })
+      end
+   end
+})
+
+-- سلايدر تعديل سرعة المشي (Walk Speed)
+local WalkSpeedSlider = PlayerTab:CreateSlider({
+   Name = "Walk Speed",
+   Range = {0, 500},
+   Increment = 1,
+   Suffix = "",
+   CurrentValue = defaultWalkSpeed,
+   Flag = "WalkSpeedSlider",
+   Callback = function(Value)
+      if WalkSpeedEnabled then
+         local hum = getHumanoid()
+         if hum then
+            hum.WalkSpeed = Value
+         end
+      end
+   end
+})
+
+---------------------------
+-- التحكم بقوة القفز:
+---------------------------
+-- زر "تفعيل/تعطيل قوة القفز"
+PlayerTab:CreateButton({
+   Name = "تفعيل/تعطيل قوة القفز",
+   Callback = function()
+      JumpPowerEnabled = not JumpPowerEnabled
+      local hum = getHumanoid()
+      if JumpPowerEnabled then
+         CICADA_HUB:Notify({
+            Title = "القفز",
+            Content = "تم تفعيل القفز ✅",
+            Duration = 3,
+            Image = 4483362458,
+         })
+      else
+         if hum then
+            hum.JumpPower = defaultJumpPower  -- إعادة قوة القفز للقيمة الأصلية
+         end
+         CICADA_HUB:Notify({
+            Title = "القفز",
+            Content = "تم إيقاف القفز ❌",
+            Duration = 3,
+            Image = 4483362458,
+         })
+      end
+   end
+})
+
+-- سلايدر تعديل قوة القفز (Jump Power)
+local JumpPowerSlider = PlayerTab:CreateSlider({
+   Name = "Jump Power",
+   Range = {0, 500},
+   Increment = 1,
+   Suffix = "",
+   CurrentValue = defaultJumpPower,
+   Flag = "JumpPowerSlider",
+   Callback = function(Value)
+      if JumpPowerEnabled then
+         local hum = getHumanoid()
+         if hum then
+            hum.JumpPower = Value
+         end
+      end
+   end
+})
+
+---------------------------
+-- التحكم بالجاذبية:
+---------------------------
+-- زر "تفعيل/تعطيل الجاذبية"
+PlayerTab:CreateButton({
+   Name = "تفعيل/تعطيل الجاذبية",
+   Callback = function()
+      gravityEnabled = not gravityEnabled
+      if gravityEnabled then
+         workspace.Gravity = currentGravityValue  -- تطبيق قيمة السلايدر الحالية
+         CICADA_HUB:Notify({
+            Title = "الجاذبية",
+            Content = "تم تفعيل الجاذبية ✅",
+            Duration = 3,
+            Image = 4483362458,
+         })
+      else
+         workspace.Gravity = defaultGravity  -- إعادة الجاذبية للقيمة الأصلية
+         CICADA_HUB:Notify({
+            Title = "الجاذبية",
+            Content = "تم إيقاف الجاذبية ❌",
+            Duration = 3,
+            Image = 4483362458,
+         })
+      end
+   end
+})
+
+-- سلايدر تعديل الجاذبية (Gravity)
+local GravitySlider = PlayerTab:CreateSlider({
+   Name = "Gravity",
+   Range = {0, 500},
+   Increment = 1,
+   Suffix = "",
+   CurrentValue = defaultGravity,
+   Flag = "GravitySlider",
+   Callback = function(Value)
+      currentGravityValue = Value
+      if gravityEnabled then
+         workspace.Gravity = Value
+      end
+   end
+})
+
+---------------------------
+-- باقي الأزرار:
+---------------------------
+-- زر لتفعيل سكربت الطيران
+PlayerTab:CreateButton({
+   Name = "Fly",
+   Callback = function()
+      loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-v3-13879"))()
+   end,
+})
+
+-- زر "فلينق" لتحميل أو إيقاف سكربت الفلينق
+PlayerTab:CreateButton({
+   Name = "فلينق",
+   Callback = function()
+      if flingScriptActive then
+         if flingScript then
+            pcall(function() flingScript:Disconnect() end)
+         end
+         CICADA_HUB:Notify({
+            Title = "Fling Script",
+            Content = "تم إيقاف الفلينق.",
+            Duration = 3,
+            Image = 4483362458,
+         })
+         flingScriptActive = false
+      else
+         flingScript = loadstring(game:HttpGet("https://raw.githubusercontent.com/0Ben1/fe./main/Fling%20GUI"))()
+         CICADA_HUB:Notify({
+            Title = "Fling Script",
+            Content = "تم تفعيل الفلينق، يمكن تفعيل الـFling في الماب المناسب.",
+            Duration = 5,
+            Image = 4483362458,
+         })
+         flingScriptActive = true
+      end
+   end,
+})
+
+-- زر "Hitbox" لتحميل سكربت توسيع الHitbox
+PlayerTab:CreateButton({
+   Name = "Hitbox",
+   Callback = function()
+      loadstring(game:HttpGet("https://raw.githubusercontent.com/NooobieBlox/HitboxExpander/main/JustAScript"))()
+   end
+})
+
+-- زر "رقصات" لتفعيل سكربت الرقصات
+PlayerTab:CreateButton({
+   Name = "رقصات",
+   Callback = function()
+      loadstring(game:HttpGet("https://pastebin.com/raw/eCpipCTH"))()
+   end,
+})
+
+-- زر "العاده السريه" لاكتشاف نوع الشخصية وتشغيل السكربت المناسب
+PlayerTab:CreateButton({
+   Name = "العاده السريه",
+   Callback = function()
+      local hum = getHumanoid()
+      if hum then
+         if hum.RigType == Enum.HumanoidRigType.R6 then
+            CICADA_HUB:Notify({
+               Title = "R6 Detected",
+               Content = "Running R6 Script...",
+               Duration = 3,
+               Image = 4483362458,
+            })
+            loadstring(game:HttpGet("https://pastefy.app/wa3v2Vgm/raw"))()
+         elseif hum.RigType == Enum.HumanoidRigType.R15 then
+            CICADA_HUB:Notify({
+               Title = "R15 Detected",
+               Content = "Running R15 Script...",
+               Duration = 3,
+               Image = 4483362458,
+            })
+            loadstring(game:HttpGet("https://pastefy.app/YZoglOyJ/raw"))()
+         else
+            CICADA_HUB:Notify({
+               Title = "Unknown Rig",
+               Content = "Could not detect rig type.",
+               Duration = 3,
+               Image = 4483362458,
+            })
+         end
+      end
+   end,
+})
+
+-- زر إخفاء الشخصية في مكان اللاعب
+PlayerTab:CreateButton({
+   Name = "إخفاء الشخصية",
+   Callback = function()
+      loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Invisible-script-20557"))()
+   end
+})
+
+----------------------------------------------------------
+-- تبويب CREDITS
+----------------------------------------------------------
+local CreditsTab = Window:CreateTab("CREDITS", 4483362458)
+CreditsTab:CreateLabel("Made by CICADA")  -- تغيير النص إلى "Made by CICADA"
+
+----------------------------------------------------------
+-- تبويب FARMING
+----------------------------------------------------------
+local FarmingTab = Window:CreateTab("FARMING", 4483362458)
+FarmingTab:CreateLabel("قيد التطوير")
+
+----------------------------------------------------------
+-- تبويب MISC
+----------------------------------------------------------
+local MiscTab = Window:CreateTab("MISC", 4483362458)
+
+-- زر "ازالة اللاق" لتحميل سكربت إزالة اللاق
+MiscTab:CreateButton({
+   Name = "ازالة اللاق",
+   Callback = function()
+      loadstring(game:HttpGet("https://raw.githubusercontent.com/CasperFlyModz/discord.gg-rips/main/FPSBooster.lua"))()
+   end,
+})
+
+-- زر "Anti AFK"
+MiscTab:CreateButton({
+   Name = "Anti AFK",
+   Callback = function()
+      loadstring(game:HttpGet("https://pastebin.com/raw/5QDhe6dt"))()
+   end
+})
+
+MiscTab:CreateColorPicker({
+   Name = "Background Color",
+   Default = Color3.fromRGB(0, 0, 0),
+   Flag = "BGColor",
+   Callback = function(Value)
+      CICADA_HUB:Notify({
+         Title = "تنبيه",
+         Content = "تغيير لون الخلفية قد يحتاج"
+      })
+   end,
+})
+
+----------------------------------------------------------
+-- نهاية السكربت
+----------------------------------------------------------
